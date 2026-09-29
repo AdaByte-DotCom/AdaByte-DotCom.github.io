@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voicecast — turn your words into speech</title>
+<meta name="description" content="A free, browser-based text-to-speech tool. Paste your text, pick a voice, and listen — no sign-up, no downloads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151c; --ink2:#1b202b; --parchment:#f4efe3; --parchment-dim:#e7e0cf;
+    --amber:#dfa458; --teal:#5fa8a0; --muted:#93a0ad; --line:#2a3140;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--parchment);
+    font-family:'Inter',sans-serif;line-height:1.5;}
+  a{color:var(--amber);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px;}
+
+  nav{border-bottom:1px solid var(--line);padding:20px 0;}
+  nav .wrap{display:flex;justify-content:space-between;align-items:center;}
+  .brand{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.15rem;color:var(--parchment);text-decoration:none;}
+  .navlinks a{color:var(--muted);text-decoration:none;font-size:.88rem;margin-left:22px;}
+  .navlinks a:hover{color:var(--parchment);}
+
+  header.hero{padding:64px 0 20px;}
+  h1{font-family:'Source Serif 4',serif;font-weight:600;font-size:2.3rem;line-height:1.15;
+    margin:0 0 14px;max-width:14ch;}
+  .lede{color:var(--muted);font-size:1.02rem;max-width:52ch;margin:0 0 40px;}
+
+  .tool{background:var(--parchment);color:var(--ink);border-radius:16px;padding:26px;margin-bottom:60px;}
+  textarea{width:100%;min-height:150px;border:1px solid #d8cfba;border-radius:10px;padding:16px;
+    font-family:'Inter';font-size:1rem;color:var(--ink);background:#fffdf8;resize:vertical;outline:none;}
+  textarea:focus{border-color:var(--teal);}
+  .charcount{font-size:.78rem;color:#8a8270;text-align:right;margin-top:4px;}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
+  .control{display:flex;flex-direction:column;gap:6px;}
+  .control label{font-size:.78rem;color:#6b6454;display:flex;justify-content:space-between;}
+  select, input[type="range"]{width:100%;}
+  select{padding:9px 10px;border-radius:8px;border:1px solid #d8cfba;background:#fffdf8;font-family:'Inter';font-size:.92rem;}
+  input[type="range"]{accent-color:var(--teal);}
+
+  .playbar{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+  button{font-family:'Inter';font-weight:600;font-size:.9rem;border:none;border-radius:999px;
+    padding:12px 22px;cursor:pointer;}
+  .btn-primary{background:var(--ink);color:var(--parchment);}
+  .btn-primary:hover{background:#26303f;}
+  .btn-secondary{background:transparent;color:var(--ink);border:1px solid #cfc6ae;}
+  .btn-secondary:hover{border-color:#a99;}
+  button:disabled{opacity:.45;cursor:default;}
+  #statusMsg{font-size:.82rem;color:#8a8270;margin-top:12px;min-height:1.2em;}
+
+  .divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.78rem;margin:50px 0;}
+  .divider .line{flex:1;height:1px;background:var(--line);}
+
+  .features{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:60px;}
+  .feature h3{font-family:'Source Serif 4',serif;font-weight:600;font-size:1.05rem;margin:0 0 6px;}
+  .feature p{color:var(--muted);font-size:.92rem;margin:0;}
+
+  footer{border-top:1px solid var(--line);padding:28px 0 50px;color:var(--muted);font-size:.82rem;}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  footer a{color:var(--muted);}
+  footer a:hover{color:var(--parchment);}
+
+  @media(max-width:560px){
+    .controls, .features{grid-template-columns:1fr;}
+    h1{font-size:1.9rem;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html">Voicecast</a>
+    <div class="navlinks">
+      <a href="about.html">About</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Give your words a voice.</h1>
+    <p class="lede">Paste any text below, choose a voice, and hear it read aloud — right in your browser. No account, no upload, nothing to install.</p>
+
+    <div class="tool">
+      <textarea id="textInput" placeholder="Type or paste what you want read aloud…" maxlength="3000">Welcome to Voicecast. Paste your own text here, then press play to hear it out loud.</textarea>
+      <div class="charcount"><span id="charCount">0</span> / 3000</div>
+
+      <div class="controls">
+        <div class="control">
+          <label>Voice</label>
+          <select id="voiceSelect"></select>
+        </div>
+        <div class="control">
+          <label>Speed <span id="rateVal">1.0×</span></label>
+          <input type="range" id="rateInput" min="0.5" max="2" step="0.1" value="1">
+        </div>
+        <div class="control">
+          <label>Pitch <span id="pitchVal">1.0</span></label>
+          <input type="range" id="pitchInput" min="0" max="2" step="0.1" value="1">
+        </div>
+        <div class="control">
+          <label>Volume <span id="volVal">100%</span></label>
+          <input type="range" id="volInput" min="0" max="1" step="0.05" value="1">
+        </div>
+      </div>
+
+      <div class="playbar">
+        <button class="btn-primary" id="playBtn">Play</button>
+        <button class="btn-secondary" id="pauseBtn" disabled>Pause</button>
+        <button class="btn-secondary" id="stopBtn" disabled>Stop</button>
+      </div>
+      <div id="statusMsg"></div>
+    </div>
+
+    <div class="divider"><div class="line"></div>how it works<div class="line"></div></div>
+
+    <div class="features">
+      <div class="feature">
+        <h3>Runs in your browser</h3>
+        <p>Voicecast uses your browser's own speech engine. Nothing you type is sent to a server.</p>
+      </div>
+      <div class="feature">
+        <h3>Real voices, no setup</h3>
+        <p>Pick from whatever voices your device already has installed — no downloads required.</p>
+      </div>
+      <div class="feature">
+        <h3>Adjustable delivery</h3>
+        <p>Slow it down, speed it up, or change the pitch until it sounds right for you.</p>
+      </div>
+      <div class="feature">
+        <h3>Completely free</h3>
+        <p>No account, no subscription, no limit on how much you read aloud.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Voicecast</span>
+    <span><a href="about.html">About</a> · <a href="privacy.html">Privacy Policy</a></span>
+  </div>
+</footer>
+
+<script>
+const synth = window.speechSynthesis;
+const textInput = document.getElementById('textInput');
+const charCount = document.getElementById('charCount');
+const voiceSelect = document.getElementById('voiceSelect');
+const rateInput = document.getElementById('rateInput');
+const pitchInput = document.getElementById('pitchInput');
+const volInput = document.getElementById('volInput');
+const rateVal = document.getElementById('rateVal');
+const pitchVal = document.getElementById('pitchVal');
+const volVal = document.getElementById('volVal');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const stopBtn = document.getElementById('stopBtn');
+const statusMsg = document.getElementById('statusMsg');
+
+let voices = [];
+let utterance = null;
+
+function updateCharCount(){
+  charCount.textContent = textInput.value.length;
+}
+textInput.addEventListener('input', updateCharCount);
+updateCharCount();
+
+function populateVoices(){
+  voices = synth.getVoices();
+  voiceSelect.innerHTML = '';
+  if(voices.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'No voices found on this device';
+    voiceSelect.appendChild(opt);
+    return;
+  }
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    voiceSelect.appendChild(opt);
+  });
+}
+populateVoices();
+if(synth.onvoiceschanged !== undefined){
+  synth.onvoiceschanged = populateVoices;
+}
+
+rateInput.addEventListener('input', () => rateVal.textContent = parseFloat(rateInput.value).toFixed(1) + '×');
+pitchInput.addEventListener('input', () => pitchVal.textContent = parseFloat(pitchInput.value).toFixed(1));
+volInput.addEventListener('input', () => volVal.textContent = Math.round(volInput.value * 100) + '%');
+
+function setPlayingState(isPlaying, isPaused){
+  playBtn.disabled = isPlaying && !isPaused;
+  pauseBtn.disabled = !isPlaying || isPaused;
+  stopBtn.disabled = !isPlaying;
+}
+
+playBtn.addEventListener('click', () => {
+  if(synth.paused){
+    synth.resume();
+    setPlayingState(true, false);
+    statusMsg.textContent = 'Resumed.';
+    return;
+  }
+  const text = textInput.value.trim();
+  if(!text){
+    statusMsg.textContent = 'Type something first.';
+    return;
+  }
+  synth.cancel();
+  utterance = new SpeechSynthesisUtterance(text);
+  const selected = voices[voiceSelect.value];
+  if(selected) utterance.voice = selected;
+  utterance.rate = parseFloat(rateInput.value);
+  utterance.pitch = parseFloat(pitchInput.value);
+  utterance.volume = parseFloat(volInput.value);
+
+  utterance.onstart = () => { setPlayingState(true, false); statusMsg.textContent = 'Speaking…'; };
+  utterance.onend = () => { setPlayingState(false, false); statusMsg.textContent = 'Done.'; };
+  utterance.onerror = () => { setPlayingState(false, false); statusMsg.textContent = 'Something interrupted playback.'; };
+
+  synth.speak(utterance);
+});
+
+pauseBtn.addEventListener('click', () => {
+  synth.pause();
+  setPlayingState(true, true);
+  statusMsg.textContent = 'Paused.';
+});
+
+stopBtn.addEventListener('click', () => {
+  synth.cancel();
+  setPlayingState(false, false);
+  statusMsg.textContent = 'Stopped.';
+});
+</script>
+
+</body>
+</html>
